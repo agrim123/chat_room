@@ -20,3 +20,36 @@ exports.signup = function(req,res){
 		}
 	});
 };
+exports.login = function(req,res){
+	User.findOne({username:req.body.username})
+	.exec(function(err,user){
+		if(!user){
+			err = 'User not found';
+		}else if(user.hashed_password === hashpassword(req.body.password.toString())){
+			req.session.regenerate(function(){
+				req.session.user = user.id;
+				req.session.username = user.username;
+				req.session.msg = 'Auithenticated as '+ user.username;
+				res.redirect('/');
+			});
+		}else{
+			err = 'Authentication failed';
+		}
+		if(err){
+			req.session.regenerate(function(){
+				req.session.msg = err;
+				res.redirect('/');
+			});
+		}
+	});
+};
+exports.getUserProfile = function(req,res){
+	User.findOne({_id:req.session.user})
+	.exec(function(err,user){
+		if(!user){
+			res.json(404,{err:'User not found'});
+		}else{
+			res.json(user);
+		}
+	});
+};

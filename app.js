@@ -9,8 +9,7 @@ var mongoStore = require('connect-mongo')({session:expressSession});
 var mongoose = require('mongoose');
 require('./models/user.js');
 var db = mongoose.connect('mongodb://localhost:27017/auth');
-var routes = require('./routes/index');
-//var login = require('./routes/login');
+var routes = require('./routes/routes');
 
 var app = express();
 
@@ -34,8 +33,8 @@ app.use(expressSession({
     }) 
 }));
 app.use('/', routes);
-//app.use('/login', login);
-//require('./routes');
+//app.use('/users', users);
+
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
     var err = new Error('Not Found');
