@@ -13,7 +13,7 @@ var config = JSON.parse(fs.readFileSync("config.json"));
 if (app.get('env') === 'development'){
 var db = mongoose.connect(config["mongourl"]);
 }else{
-    var db = mongoose.connect(<%= ENV['MONGODB_URI'] %>);
+    var db = mongoose.connect('<%= ENV['MONGODB_URI'] %>');
 }
 var routes = require('./routes/routes');
 
