@@ -6,9 +6,15 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressSession = require('express-session');
 var mongoStore = require('connect-mongo')({session:expressSession});
+var fs = require("fs");
 var mongoose = require('mongoose');
 require('./models/user.js');
-var db = mongoose.connect('mongodb://localhost:27017/auth');
+var config = JSON.parse(fs.readFileSync("config.json"));
+if (app.get('env') === 'development'){
+var db = mongoose.connect(config["mongourl"]);
+}else{
+    var db = mongoose.connect(<%= ENV['MONGODB_URI'] %>);
+}
 var routes = require('./routes/routes');
 
 var app = express();
