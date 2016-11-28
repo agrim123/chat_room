@@ -11,7 +11,7 @@ var mongoose = require('mongoose');
 require('./models/user.js');
 var config = JSON.parse(fs.readFileSync("config.json"));
 if (app.get('env') === 'development'){
-var db = mongoose.connect(config["mongourl"]);
+    var db = mongoose.connect(config["mongourl"]);
 }else{
     var db = mongoose.connect("<%= ENV['MONGODB_URI'] %>");
 }
@@ -74,10 +74,10 @@ app.use(function(err, req, res, next) {
 
 
 module.exports = app;
- function(socket){
+io.sockets.on('connection',function(socket){
   socket.on('chat message', function(msg){
     io.emit('chat message', msg);
-  });
+});
 });
 io.sockets.on('disconnect',function(){
     console.log('user disconnected');
