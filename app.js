@@ -10,13 +10,16 @@ var mongoose = require('mongoose');
 require('./models/user.js');
 var db = mongoose.connect('mongodb://localhost:27017/auth');
 var routes = require('./routes/routes');
-
 var app = express();
+var debug = require('debug')('my-application');
+
+var port = 3000;
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
+app.use(express.static(__dirname + '/public'));
 app.use(favicon());
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -66,5 +69,12 @@ app.use(function(err, req, res, next) {
     });
 });
 
-
-module.exports = app;
+var io = require('socket.io').listen(app.listen(port));
+io.sockets.on('connection', function(socket){
+  socket.on('chat message', function(msg){
+    io.emit('chat message', msg);
+  });
+});
+io.sockets.on('disconnect',function(){
+    console.log('user disconnected');
+});
