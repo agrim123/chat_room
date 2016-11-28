@@ -38,7 +38,7 @@ router.get('/logout',function(req,res){
 		res.redirect('/login');
 	});
 });
-//router.post('/signup',users.signup);
+router.post('/signup',users.signup);
 //router.post('/user/update',users.updateUser);
 //router.post('/user/delete',users.deleteUser);
 //router.post('/login',users.login);
