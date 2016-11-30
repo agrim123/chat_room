@@ -95,8 +95,8 @@ io.sockets.on('connection', function(socket){
         }
     });
         });
-        socket.on('notifyUser', function(username){
-            io.emit('notifyUser', username);
+        socket.on('notifyUser', function(useristyping){
+            io.emit('notifyUser', useristyping);
         });
         socket.on('disconnect', function () {
             io.emit("leave_room",name);

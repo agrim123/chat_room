@@ -5,9 +5,9 @@
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
 	<style type="text/css">
-		form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-		form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-		form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+		#input_message { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+		#input_message input { border: 0; padding: 10px; width: 100%; margin-right: .5%; }
+		
 		#messages { list-style-type: none; margin: 0; padding: 0; }
 		#messages li { padding: 5px 10px; }
 		#messages li:nth-child(odd) { background: #eee; }
@@ -39,21 +39,25 @@
 			<ul id="activity"></ul>
 		</div>
 	</div>
-	<form action="POST">
-		<input id="m" autocomplete="off" name="content" placeholder="Press enter to send message" /><button>Send</button>
-	</form>
+	<div id="input_message">
+		<input id="m" autocomplete="off" name="content" placeholder="Press enter to send message" />
+	</div>
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script type="text/javascript">
 		var socket = io();
 		//var fromuser = '<%= username %>';
 		var username = '<%= username %>';
-		$('form').submit(function(){
+		$('#m').keyup(function(e){
+			if(e.keyCode == 13){
 			var content = $('#m').val();
 			var message = {fromuser:username,content:content} 
 			socket.emit('chat message', message);
 			$('#m').val('').focus();
 			return false;
+		}else{
+			socket.emit('notifyUser',username);
+		}
 		});
 		socket.emit("name",username);
 		socket.on("join_room",function(name){
@@ -69,11 +73,11 @@
 				$('#messages').append($('<li class="other">').text(messagedata.username + " : " + messagedata.content));	
 			}
 		});
-		socket.on('notifyUser', function(username){
+		socket.on('notifyUser', function(useristyping){
 			
-			$('#notifyUser').text(username + ' is typing ...');
+			$('#notifyUser').text(useristyping + ' is typing ...');
 			
-			setTimeout(function(){ $('#notifyUser').text(''); }, 1000);;
+			setTimeout(function(){ $('#notifyUser').text(''); }, 5000);
 		});
 	</script>
 	<script type="text/javascript">
