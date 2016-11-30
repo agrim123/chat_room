@@ -81,24 +81,25 @@ app.use(function(err, req, res, next) {
 var io = require('socket.io').listen(app.listen(process.env.PORT || port));
 io.sockets.on('connection', function(socket){
     socket.on('name',function(name){
-
-
-    io.emit("join_room",name);
-    socket.on('chat message', function(msg,username){
-        var message = new Message({username:username,content:msg,created:Date.now()});
-        message.save(function(err){
-            if(err){
-                console.log(err);
-                io.emit('chat message', "error sending message");
-            }else{
+        io.emit("join_room",name);
+        socket.on('chat message', function(msg,fromuser){
+            var message = new Message({username:fromuser,content:msg,created:Date.now()});
+            message.save(function(err){
+                if(err){
+                    console.log(err);
+                    io.emit('chat message', "error sending message");
+                }else{
             //console.log('send');
-            io.emit('chat message', msg);
+            io.emit('chat message', msg,fromuser);
         }
     });
+        });
+        socket.on('notifyUser', function(user){
+            io.emit('notifyUser', user);
+        });
+        socket.on('disconnect', function () {
+            io.emit("join_room",name);
+        });
     });
-    socket.on('disconnect', function () {
-        io.emit("join_room",name);
-    });
-});
 });
 

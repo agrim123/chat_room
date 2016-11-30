@@ -18,23 +18,26 @@
 	<div class="row">
 		<div class="col-md-8 col-md-offset-1">
 			<ul id="messages"></ul>
+			<span id="notifyUser"></span>
 		</div>
 		<div class="col-md-3">
 			<ul id="activity"></ul>
 		</div>
 	</div>
 	<form action="POST">
+		<input type="hidden" id="user" value="" />
 		<input id="m" autocomplete="off" name="content" placeholder="Press enter to send message" /><button>Send</button>
 	</form>
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 	<script type="text/javascript">
 		var socket = io();
+		var fromuser = '<%= username %>';
 		var username = '<%= username %>';
 		$('form').submit(function(){
 			var content = $('#m').val();
-			socket.emit('chat message', content,username);
-			$('#m').val('');
+			socket.emit('chat message', content,fromuser);
+			$('#m').val('').focus();
 			return false;
 		});
 		socket.emit("name",username);
@@ -44,9 +47,39 @@
 		socket.on("leave_room",function(name){
 			$('#activity').append($('<li>').text(name + ' left the room'));
 		});
-		socket.on('chat message', function(msg){
-			$('#messages').append($('<li>').text('<%=username%>: ' + msg));
+		socket.on('chat message', function(msg,name){
+			$('#messages').append($('<li>').text(name + " : " + msg));
 		});
+		socket.on('notifyUser', function(user){
+			var me = $('#user').val();
+			if(user != me) {
+				$('#notifyUser').text(user + ' is typing ...');
+			}
+			setTimeout(function(){ $('#notifyUser').text(''); }, 1000);;
+		});
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var name = makeid();
+			$('#user').val(name);
+
+		});
+
+	</script>
+	<script type="text/javascript">
+		function notifyTyping() { 
+			var user = $('#user').val();
+			socket.emit('notifyUser', user);
+		}
+		function makeid() {
+			var text = "";
+			var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+			for( var i=0; i < 5; i++ ) {
+				text += possible.charAt(Math.floor(Math.random() * possible.length));
+			}
+			return text;
+		}
 	</script>
 </body>
 </html>
