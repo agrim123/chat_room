@@ -9,15 +9,14 @@ var mongoStore = require('connect-mongo')({session:expressSession});
 var fs = require("fs");
 var mongoose = require('mongoose');
 require('./models/user.js');
-var config = JSON.parse(fs.readFileSync("config.json"));
+var Message = require('./models/message');
+
 var routes = require('./routes/routes');
 
 var app = express();
-if (app.get('env') === 'development'){
-    var db = mongoose.connect(config["mongourl"]);
-}else{
-    var db = mongoose.connect("<%= ENV['MONGODB_URI'] %>");
-}
+
+var db = mongoose.connect("mongodb://localhost:27017/auth");
+
 var port = 3000;
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -28,7 +27,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 app.use(expressSession({
     secret:'SECRET',
     resave:true,
@@ -75,11 +73,22 @@ app.use(function(err, req, res, next) {
 
 //module.exports = app;
 var io = require('socket.io').listen(app.listen(port));
- io.sockets.on('connection', function(socket){
-   socket.on('chat message', function(msg){
-     io.emit('chat message', msg);
-   });
- });
- io.sockets.on('disconnect',function(){
-     console.log('user disconnected');
- });
+io.sockets.on('connection', function(socket){
+    io.emit("join_room","connected");
+ socket.on('chat message', function(msg,username){
+    var message = new Message({username:username,content:msg,created:Date.now()});
+    message.save(function(err){
+        if(err){
+            console.log(err);
+            io.emit('chat message', "error sending message");
+        }else{
+            //console.log('send');
+            io.emit('chat message', msg);
+        }
+    });
+});
+ socket.on('disconnect', function () {
+    io.emit("join_room","left");
+  });
+});
+

@@ -10,7 +10,7 @@ exports.signup = function(req,res){
 	user.set('email',req.body.email);
 	user.save(function(err){
 		if(err){
-			res.session.error = err;
+			//res.session.error = err;
 			res.redirect('/signup');
 		}else{
 			req.session.user = user.id;

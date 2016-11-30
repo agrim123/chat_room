@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var crypto = require('crypto');
 var users = require('../controllers/users_controller');
+var messages = require('../controllers/messages_controller');
 
 router.get('/',function(req,res){
 	if(req.session.user){
@@ -43,5 +44,7 @@ router.post('/signup',users.signup);
 //router.post('/user/delete',users.deleteUser);
 router.post('/login',users.login);
 router.get('/user/profile',users.getUserProfile);
+//router.post('/',messages.send);
 
 module.exports = router;
+
