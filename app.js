@@ -78,7 +78,7 @@ app.use(function(err, req, res, next) {
 
 
 //module.exports = app;
-var io = require('socket.io').listen(app.listen(port));
+var io = require('socket.io').listen(app.listen(process.env.PORT || port));
 io.sockets.on('connection', function(socket){
     io.emit("join_room","connected");
     socket.on('chat message', function(msg,username){
