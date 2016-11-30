@@ -51,7 +51,8 @@
 		var username = '<%= username %>';
 		$('form').submit(function(){
 			var content = $('#m').val();
-			socket.emit('chat message', content,fromuser);
+			var message = {fromuser:fromuser,content:content} 
+			socket.emit('chat message', message);
 			$('#m').val('').focus();
 			return false;
 		});
@@ -62,11 +63,11 @@
 		socket.on("leave_room",function(name){
 			$('#activity').append($('<li>').text(name + ' left the room'));
 		});
-		socket.on('chat message', function(msg,name){
-			if(name === username){
-				$('#messages').append($('<li class="self">').text(name + " : " + msg));
+		socket.on('chat message', function(message){
+			if(message.name === username){
+				$('#messages').append($('<li class="self">').text(name + " : " + message.content));
 			}else{
-				$('#messages').append($('<li class="other">').text(name + " : " + msg));	
+				$('#messages').append($('<li class="other">').text(name + " : " + message.content));	
 			}
 		});
 		socket.on('notifyUser', function(user){
