@@ -3,7 +3,9 @@ var router = express.Router();
 var crypto = require('crypto');
 var users = require('../controllers/users_controller');
 var messages = require('../controllers/messages_controller');
-
+router.get('/chat',function(req,res){
+	res.render('chat');
+});
 router.get('/',function(req,res){
 	if(req.session.user){
 		res.render('index',{username:req.session.username,msg:req.session.msg});
