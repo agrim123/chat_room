@@ -83,23 +83,31 @@ io.sockets.on('connection', function(socket){
     socket.on('name',function(name){
         io.emit("join_room",name);
         socket.on('chat message', function(message){
-            var message = new Message({username:message.fromuser,content:message.content,created:Date.now()});
+            var messagedata = {username:message.fromuser,content:message.content,created:Date.now()};
+            var message = new Message(messagedata);
             message.save(function(err){
                 if(err){
                     console.log(err);
                     io.emit('chat message', "error sending message");
                 }else{
             //console.log('send');
-            io.emit('chat message', message);
+            io.emit('chat message', messagedata);
         }
     });
         });
-        socket.on('notifyUser', function(user){
-            io.emit('notifyUser', user);
+        socket.on('notifyUser', function(username){
+            io.emit('notifyUser', username);
         });
         socket.on('disconnect', function () {
-            io.emit("join_room",name);
+            io.emit("leave_room",name);
         });
     });
 });
+// for retrieving last messages 
+/*
+mongo.connect(process.env.CUSTOMCONNSTR_MONGOLAB_URI, function (err, db) {
+    var collection = db.collection('chat messages')
+    var stream = collection.find().sort({ _id : -1 }).limit(10).stream();
+    stream.on('data', function (chat) { socket.emit('chat', chat.content); });
+});*/
 
