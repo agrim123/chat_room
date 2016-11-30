@@ -16,10 +16,11 @@ var routes = require('./routes/routes');
 var app = express();
 if (app.get('env') === 'development') {
     var db = mongoose.connect("mongodb://localhost:27017/auth");
+
 }else{
     var URI = process.env.MONGODB_URI;;
     var db = mongoose.connect(URI, { server: { auto_reconnect: true } }, function (err, db) {
-        /* adventure! */
+        
     });
 
 }
@@ -80,6 +81,13 @@ app.use(function(err, req, res, next) {
 //module.exports = app;
 var io = require('socket.io').listen(app.listen(process.env.PORT || port));
 io.sockets.on('connection', function(socket){
+    socket.on('chat_data',function(){
+       Message.find({}).limit(10).sort({'created': -1}).exec(function(err, messages) {
+          if (err) throw err;
+          //console.log(messages);
+       io.emit('chat_data',messages);
+      });
+   });
     socket.on('name',function(name){
         io.emit("join_room",name);
         socket.on('chat message', function(message){
@@ -103,11 +111,7 @@ io.sockets.on('connection', function(socket){
         });
     });
 });
-// for retrieving last messages 
-/*
-mongo.connect(process.env.CUSTOMCONNSTR_MONGOLAB_URI, function (err, db) {
-    var collection = db.collection('chat messages')
-    var stream = collection.find().sort({ _id : -1 }).limit(10).stream();
-    stream.on('data', function (chat) { socket.emit('chat', chat.content); });
-});*/
+
+
+
 
