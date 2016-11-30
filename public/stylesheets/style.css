@@ -153,7 +153,7 @@ a {
 }
 .chat-wrapper .chat-message .chat-details span {
 	float: right;
-	margin-top: -5px;
+	margin-top: -4px;
   margin-right: 4px;
   color: black;
 }

@@ -28,25 +28,22 @@
 			<ul id="activity"></ul>
 		</div>
 	</div>
-	
-
-</div>
-<div id="input_message">
-	<input id="m" autocomplete="off" name="content" placeholder="Press enter to send message" />
-</div>
-<script type="text/javascript">
-	var socket = io();
-	var username = '<%= username %>';
+	<div id="input_message">
+		<input id="m" autocomplete="off" name="content" placeholder="Press enter to send message" />
+	</div>
+	<script type="text/javascript">
+		var socket = io();
+		var username = '<%= username %>';
 		socket.emit('chat_data');
 		socket.on('chat_data',function(messages){
 			for(i=messages.length-1; i>=0;i--){
-			if(messages[i].username === username){
-				$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messages[i].content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messages[i].username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
-			}else{
-				$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messages[i].content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messages[i].username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
+				if(messages[i].username === username){
+					$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messages[i].content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messages[i].username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
+				}else{
+					$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messages[i].content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messages[i].username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
+				}
 			}
-		}
-	});
+		});
 		//var fromuser = '<%= username %>';
 		$('#m').keyup(function(e){
 			if(e.keyCode == 13){
