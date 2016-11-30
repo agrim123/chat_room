@@ -14,9 +14,12 @@ var Message = require('./models/message');
 var routes = require('./routes/routes');
 
 var app = express();
-
+if (app.get('env') === 'development') {
 var db = mongoose.connect("mongodb://localhost:27017/auth");
+}else{
+    var db = mongoose.connect("<%= ENV['MONGODB_URI']%>");
 
+}
 var port = 3000;
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
