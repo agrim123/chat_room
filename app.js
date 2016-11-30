@@ -80,7 +80,10 @@ app.use(function(err, req, res, next) {
 //module.exports = app;
 var io = require('socket.io').listen(app.listen(process.env.PORT || port));
 io.sockets.on('connection', function(socket){
-    io.emit("join_room","connected");
+    socket.on('name',function(name){
+
+
+    io.emit("join_room",name);
     socket.on('chat message', function(msg,username){
         var message = new Message({username:username,content:msg,created:Date.now()});
         message.save(function(err){
@@ -94,7 +97,8 @@ io.sockets.on('connection', function(socket){
     });
     });
     socket.on('disconnect', function () {
-        io.emit("join_room","left");
+        io.emit("join_room",name);
     });
+});
 });
 
