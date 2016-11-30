@@ -15,9 +15,12 @@ var routes = require('./routes/routes');
 
 var app = express();
 if (app.get('env') === 'development') {
-var db = mongoose.connect("mongodb://localhost:27017/auth");
+    var db = mongoose.connect("mongodb://localhost:27017/auth");
 }else{
-    var db = mongoose.connect("<%= ENV['MONGODB_URI']%>");
+    var URI = process.env.MONGODB_URI;;
+    var db = mongodb.MongoClient.connect(URI, { server: { auto_reconnect: true } }, function (err, db) {
+        /* adventure! */
+    });
 
 }
 var port = 3000;
@@ -78,20 +81,20 @@ app.use(function(err, req, res, next) {
 var io = require('socket.io').listen(app.listen(port));
 io.sockets.on('connection', function(socket){
     io.emit("join_room","connected");
- socket.on('chat message', function(msg,username){
-    var message = new Message({username:username,content:msg,created:Date.now()});
-    message.save(function(err){
-        if(err){
-            console.log(err);
-            io.emit('chat message', "error sending message");
-        }else{
+    socket.on('chat message', function(msg,username){
+        var message = new Message({username:username,content:msg,created:Date.now()});
+        message.save(function(err){
+            if(err){
+                console.log(err);
+                io.emit('chat message', "error sending message");
+            }else{
             //console.log('send');
             io.emit('chat message', msg);
         }
     });
-});
- socket.on('disconnect', function () {
-    io.emit("join_room","left");
-  });
+    });
+    socket.on('disconnect', function () {
+        io.emit("join_room","left");
+    });
 });
 
