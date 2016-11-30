@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+<head>
+	<title>General Room</title>
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+</head>
+<body>
+
+	<div class="row">
+		<div class="col-md-1">
+			Rooms
+			<a href="/room/general">General
+			</a>
+			<br />
+			<a href="/room/node">Node
+			</a>
+		</div>
+		<div class="col-md-2" style="text-decoration: capitalize;font-size: 20px">
+			<%=: username | capitalize %>
+		</div>
+		<div class="col-md-6" style="text-align: right;">
+			<a href="/logout">Logout</a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-8 col-md-offset-1 col-xs-8 col-xs-offset-1">
+			<div class='chat-wrapper'>
+				<div id="messages" class='chat-message padding'>
+				</div>
+				<span id="notifyUser"></span>
+			</div>
+		</div>
+		<div class="col-md-3 col-xs-3">
+			<ul id="activity"></ul>
+		</div>
+	</div>
+	<div id="input_message">
+		<input id="m" autocomplete="off" name="content" placeholder="Press enter to send message" />
+	</div>
+	<script type="text/javascript">
+		var socket = io();
+		var room = '<%= room %>';
+		var username = '<%= username %>';
+		socket.emit('chat_data',room);
+		socket.on('chat_data',function(messages){
+			for(i=messages.length-1; i>=0;i--){
+				if(messages[i].username === username){
+					$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messages[i].content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messages[i].username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
+				}else{
+					$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messages[i].content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messages[i].username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
+				}
+			}
+		});
+		//var fromuser = '<%= username %>';
+		$('#m').keyup(function(e){
+			if(e.keyCode == 13){
+				var content = $('#m').val();
+				var message = {fromuser:username,content:content,room:room} 
+				socket.emit('chat message', message);
+				$('#m').val('').focus();
+				return false;
+			}else{
+				socket.emit('notifyUser',username);
+			}
+		});
+		socket.emit("name",username);
+		socket.on("join_room",function(name){
+			$('#activity').append($('<li>').text(name + ' joined the room'));
+		});
+		socket.on("leave_room",function(name){
+			$('#activity').append($('<li>').text(name + ' left the room'));
+		});
+		socket.on('chat message', function(messagedata){
+			if(messagedata.room === room){
+				if(messagedata.username === username){
+					$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messagedata.content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messagedata.username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
+				}else{
+					$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messagedata.content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messagedata.username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
+				}
+			}
+		});
+		socket.on('notifyUser', function(useristyping){
+			
+			$('#notifyUser').text(useristyping + ' is typing ...');
+			
+			setTimeout(function(){ $('#notifyUser').text(''); }, 5000);
+		});
+	</script>
+
+</body>
+</html>

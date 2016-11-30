@@ -81,8 +81,8 @@ app.use(function(err, req, res, next) {
 //module.exports = app;
 var io = require('socket.io').listen(app.listen(process.env.PORT || port));
 io.sockets.on('connection', function(socket){
-    socket.on('chat_data',function(){
-       Message.find({}).limit(10).sort({'created': -1}).exec(function(err, messages) {
+    socket.on('chat_data',function(room){
+       Message.find({room:room}).limit(10).sort({'created': -1}).exec(function(err, messages) {
           if (err) throw err;
           //console.log(messages);
        io.emit('chat_data',messages);
@@ -91,7 +91,7 @@ io.sockets.on('connection', function(socket){
     socket.on('name',function(name){
         io.emit("join_room",name);
         socket.on('chat message', function(message){
-            var messagedata = {username:message.fromuser,content:message.content,created:Date.now()};
+            var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
             var message = new Message(messagedata);
             message.save(function(err){
                 if(err){

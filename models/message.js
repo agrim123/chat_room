@@ -3,7 +3,8 @@ var mongoose = require('mongoose'),
 var MessageSchema = new Schema({
 	username: {type:String,required:true},
 	content :{type:String,required:true},
-	created : {type:Date,required:true}
+	created : {type:Date,required:true},
+	room : {type:String}
 });
 
 module.exports = mongoose.model('Message', MessageSchema);
