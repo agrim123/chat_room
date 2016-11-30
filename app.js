@@ -18,7 +18,7 @@ if (app.get('env') === 'development') {
     var db = mongoose.connect("mongodb://localhost:27017/auth");
 }else{
     var URI = process.env.MONGODB_URI;;
-    var db = mongodb.MongoClient.connect(URI, { server: { auto_reconnect: true } }, function (err, db) {
+    var db = mongoose.connect(URI, { server: { auto_reconnect: true } }, function (err, db) {
         /* adventure! */
     });
 
