@@ -17,14 +17,9 @@ router.get('/',function(req,res){
 router.get('/room/:room',function(req,res){
 	if(req.session.user){
 		var room = req.params.room;
-		if(room == 'general'){
-			res.render('rooms/general',{username:req.session.username,msg:req.session.msg,room:room});
-		}
-		else if(room == 'node'){
-			res.render('rooms/node',{username:req.session.username,msg:req.session.msg,room:room});
-		}else{
-			res.render('index',{username:req.session.username,msg:req.session.msg,room:room});
-		}
+		
+			res.render('rooms/room',{username:req.session.username,msg:req.session.msg,room:room});
+
 	}else{
 		req.session.msg = "Access Denied";
 		res.redirect('/login');
