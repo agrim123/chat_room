@@ -1,59 +1,96 @@
 <!doctype html>
 <html>
 <head>
-	<title><%= room %> Room</title>
+	<title><%=: room | capitalize %> Room</title>
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
 
 	<div class="row">
-		<div class="col-md-1">
-			Rooms
-			<a href="/room/general">General
-			</a>
-			<br />
-			<a href="/room/node">Node
-			</a>
-		</div>
-		<div class="col-md-2" style="text-decoration: capitalize;font-size: 20px">
-			<%=: username | capitalize %>
-		</div>
-		<div class="col-md-6" style="text-align: right;">
-			<a href="/logout">Logout</a>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-8 col-md-offset-1 col-xs-8 col-xs-offset-1">
-			<div class='chat-wrapper'>
-				<div id="messages" class='chat-message padding'>
+		<div class="col-md-2 col-xs-2">
+			<div class="col-md-12 col-xs-12">
+				Rooms
+				<div class="rooms">
 				</div>
-				<span id="notifyUser"></span>
+				<input id="new_room_name" type="text" name="new_room">
+				<button class="btn add_room"> + New Room </button>
+			</div>
+		</div>
+		<div class="col-md-6 col-xs-6">
+			<div class="row">
+				<div class="col-md-12 col-xs-12">
+					<div class="row">
+						<div class="col-md-4 col-xs-4" style="text-decoration: capitalize;font-size: 20px">
+							<%=: username | capitalize %>
+						</div>
+						<div class="col-md-8 col-xs-8" style="text-align: right;">
+							<a href="/logout">Logout</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-12 col-xs-12">
+					<div class='chat-wrapper'>
+						<div id="messages" class='chat-message padding'>
+						</div>
+						<span id="notifyUser"></span>
+					</div>
+				</div>
+				
 			</div>
 		</div>
 		<div class="col-md-3 col-xs-3">
-			<ul id="activity"></ul>
+			<div class="row">
+				<div class="col-md-12 col-xs-12">
+					<ul id="activity"></ul>
+				</div>
+			</div>
 		</div>
 	</div>
-	<div id="input_message">
-		<input id="m" autocomplete="off" name="content" placeholder="Press enter to send message" />
-	</div>
-	<script type="text/javascript">
-		var socket = io();
-		var room = '<%= room %>';
-		var username = '<%= username %>';
-		socket.emit('chat_data',room);
-		socket.on('chat_data',function(messages){
-			for(i=messages.length-1; i>=0;i--){
-				if(messages[i].username === username){
-					$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messages[i].content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messages[i].username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
-				}else{
-					$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messages[i].content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messages[i].username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
-				}
+</div>
+<div id="input_message">
+	<input id="m" name="content" placeholder="Press enter to send message" autofocus="on"/>
+	<!--
+	  data-toggle="tooltip" title="Start by sending a hi!" 
+ $('[data-toggle="tooltip"]').tooltip(); 
+-->
+</div>
+
+<script type="text/javascript">
+	var socket = io();
+	var room = '<%= room %>';
+	var username = '<%= username %>';
+	socket.emit('rooms');
+	socket.emit('chat_data',room);
+	socket.on('rooms',function(rooms){
+			//console.log(rooms);
+			for(i=0;i<rooms.length;i++){
+				$(".rooms").append("<p><a href='/room/" + rooms[i].title+"'>" + rooms[i].title+ "</a></p> ");
 			}
+
 		});
+	$(".add_room").click(function(){
+		var new_room_name = $("#new_room_name").val();
+
+		socket.emit("add_room",new_room_name,username);
+	});
+	socket.on("add_room",function(new_room){
+		$(".rooms").append("<p><a href='/room/" + new_room.title+"'>" + new_room.title+ "</a></p> ");
+	});
+	socket.on('chat_data',function(messages){
+		for(i=messages.length-1; i>=0;i--){
+			if(messages[i].username === username){
+				$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messages[i].content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messages[i].username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
+			}else{
+				$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messages[i].content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messages[i].username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
+			}
+		}
+	});
 		//var fromuser = '<%= username %>';
 		$('#m').keyup(function(e){
 			if(e.keyCode == 13){
@@ -74,11 +111,15 @@
 			$('#activity').append($('<li>').text(name + ' left the room'));
 		});
 		socket.on('chat message', function(messagedata){
-			if(messagedata.room === room){
-				if(messagedata.username === username){
-					$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messagedata.content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messagedata.username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
-				}else{
-					$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messagedata.content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messagedata.username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
+			if( typeof messagedata === 'string' ) {
+				alert(messagedata);
+			}else{
+				if(messagedata.room === room){
+					if(messagedata.username === username){
+						$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messagedata.content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messagedata.username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
+					}else{
+						$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messagedata.content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messagedata.username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
+					}
 				}
 			}
 		});

@@ -10,7 +10,7 @@ var fs = require("fs");
 var mongoose = require('mongoose');
 require('./models/user.js');
 var Message = require('./models/message');
-
+var Room = require('./models/room');
 var routes = require('./routes/routes');
 
 var app = express();
@@ -20,9 +20,7 @@ if (app.get('env') === 'development') {
 }else{
     var URI = process.env.MONGODB_URI;;
     var db = mongoose.connect(URI, { server: { auto_reconnect: true } }, function (err, db) {
-        
     });
-
 }
 var port = 3000;
 // view engine setup
@@ -76,33 +74,55 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
-
-
 //module.exports = app;
 var io = require('socket.io').listen(app.listen(process.env.PORT || port));
 io.sockets.on('connection', function(socket){
+    socket.on("rooms",function(){
+        Room.find({}).exec(function(err,rooms){
+            if(err) throw err;
+            io.emit('rooms',rooms);
+        });
+    });
+    socket.on('add_room',function(new_room_name,username){
+        var new_room = {creator:username,title:new_room_name,created:Date.now()};
+        var room = new Room(new_room);
+        room.save(function(err){
+           if(err){
+            console.log(err);
+            io.emit('add_room', "error creating room");
+        }else{
+            //console.log('send');
+            io.emit('add_room', new_room);
+        }
+    });
+    });
     socket.on('chat_data',function(room){
-       Message.find({room:room}).limit(10).sort({'created': -1}).exec(function(err, messages) {
+        Message.find({room:room}).limit(10).sort({'created': -1}).exec(function(err, messages) {
           if (err) throw err;
-          //console.log(messages);
-       io.emit('chat_data',messages);
+          io.emit('chat_data',messages);
       });
-   });
+    });
     socket.on('name',function(name){
         io.emit("join_room",name);
         socket.on('chat message', function(message){
-            var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
-            var message = new Message(messagedata);
-            message.save(function(err){
+           var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
+           Room.find({title:messagedata.room}).exec(function(err,room){
+            if(room.length == 0){
+
+                io.emit('chat message', "Room does not exist");
+            }else{
+               var message = new Message(messagedata);
+               message.save(function(err){
                 if(err){
                     console.log(err);
                     io.emit('chat message', "error sending message");
                 }else{
-            //console.log('send');
-            io.emit('chat message', messagedata);
-        }
-    });
-        });
+                    io.emit('chat message', messagedata);
+                }
+            });
+           }
+       });
+       });
         socket.on('notifyUser', function(useristyping){
             io.emit('notifyUser', useristyping);
         });
