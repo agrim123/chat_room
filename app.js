@@ -81,16 +81,21 @@ io.sockets.on('connection', function(socket){
     });
     socket.on('add_room',function(new_room_name,username){
         var new_room = {creator:username,title:new_room_name,created:Date.now()};
-        var room = new Room(new_room);
-        room.save(function(err){
-         if(err){
-            console.log(err);
-            io.emit('add_room', "error creating room");
-        }else{
-            //console.log('send');
-            io.emit('add_room', new_room);
-        }
-    });
+        Room.find({title:new_room_name}).exec(function(err,room){
+            if(room.length != 0){
+                io.emit('add_room',"Room already exists");
+            }else{
+                var room = new Room(new_room);
+                room.save(function(err){
+                   if(err){
+                    console.log(err);
+                    io.emit('add_room', "error creating room");
+                }else{
+                    io.emit('add_room', new_room);
+                }
+            });
+            }
+        });
     });
     socket.on('chat_data',function(room){
         Message.find({room:room}).limit(10).sort({'created': -1}).exec(function(err, messages) {
@@ -101,14 +106,14 @@ io.sockets.on('connection', function(socket){
     socket.on('name',function(name){
         io.emit("join_room",name);
         socket.on('chat message', function(message){
-         var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
-         Room.find({title:messagedata.room}).exec(function(err,room){
+           var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
+           Room.find({title:messagedata.room}).exec(function(err,room){
             if(room.length == 0){
 
-                io.emit('chat message', "Room does not exist");
+                io.emit('chat message', "Room does not exist! Create One ");
             }else{
-             var message = new Message(messagedata);
-             message.save(function(err){
+               var message = new Message(messagedata);
+               message.save(function(err){
                 if(err){
                     console.log(err);
                     io.emit('chat message', "error sending message");
@@ -116,9 +121,9 @@ io.sockets.on('connection', function(socket){
                     io.emit('chat message', messagedata);
                 }
             });
-         }
-     });
-     });
+           }
+       });
+       });
         socket.on('notifyUser', function(useristyping){
             io.emit('notifyUser', useristyping);
         });
