@@ -35,6 +35,7 @@ app.use(cookieParser());
 app.use(expressSession({
     secret:'SECRET',
     resave:true,
+    saveUninitialized:false,
     cookie:{maxAge:60*60*1000},
     store: new mongoStore({
         mongooseConnection: db.connection,
@@ -75,7 +76,7 @@ app.use(function(err, req, res, next) {
     });
 });
 //module.exports = app;
-var io = require('socket.io').listen(app.listen(process.env.PORT || port));
+var io = require('socket.io').listen(app.listen(process.env.PORT));
 io.sockets.on('connection', function(socket){
     socket.on("rooms",function(){
         Room.find({}).exec(function(err,rooms){
