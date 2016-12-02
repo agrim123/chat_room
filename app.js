@@ -9,20 +9,15 @@ var mongoStore = require('connect-mongo')({session:expressSession});
 var fs = require("fs");
 var mongoose = require('mongoose');
 require('./models/user.js');
+require('dotenv').config();
 var Message = require('./models/message');
 var Room = require('./models/room');
 var routes = require('./routes/routes');
 
 var app = express();
-if (app.get('env') === 'development') {
-    var db = mongoose.connect("mongodb://localhost:27017/auth");
-
-}else{
-    var URI = process.env.MONGODB_URI;;
-    var db = mongoose.connect(URI, { server: { auto_reconnect: true } }, function (err, db) {
-    });
-}
-var port = 3000;
+mongoose.Promise = global.Promise;
+var db = mongoose.connect(process.env.MONGODB_URI, { server: { auto_reconnect: true } }, function (err, db) {
+});
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -88,7 +83,7 @@ io.sockets.on('connection', function(socket){
         var new_room = {creator:username,title:new_room_name,created:Date.now()};
         var room = new Room(new_room);
         room.save(function(err){
-           if(err){
+         if(err){
             console.log(err);
             io.emit('add_room', "error creating room");
         }else{
@@ -106,14 +101,14 @@ io.sockets.on('connection', function(socket){
     socket.on('name',function(name){
         io.emit("join_room",name);
         socket.on('chat message', function(message){
-           var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
-           Room.find({title:messagedata.room}).exec(function(err,room){
+         var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
+         Room.find({title:messagedata.room}).exec(function(err,room){
             if(room.length == 0){
 
                 io.emit('chat message', "Room does not exist");
             }else{
-               var message = new Message(messagedata);
-               message.save(function(err){
+             var message = new Message(messagedata);
+             message.save(function(err){
                 if(err){
                     console.log(err);
                     io.emit('chat message', "error sending message");
@@ -121,9 +116,9 @@ io.sockets.on('connection', function(socket){
                     io.emit('chat message', messagedata);
                 }
             });
-           }
-       });
-       });
+         }
+     });
+     });
         socket.on('notifyUser', function(useristyping){
             io.emit('notifyUser', useristyping);
         });
