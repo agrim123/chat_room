@@ -103,8 +103,8 @@ io.sockets.on('connection', function(socket){
           io.emit('chat_data',messages);
       });
     });
-    socket.on('name',function(name){
-        io.emit("join_room",name);
+    socket.on('name',function(name,room){
+        io.emit("join_room",name,room);
         socket.on('chat message', function(message){
            var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
            Room.find({title:messagedata.room}).exec(function(err,room){
@@ -128,7 +128,7 @@ io.sockets.on('connection', function(socket){
             io.emit('notifyUser', useristyping);
         });
         socket.on('disconnect', function () {
-            io.emit("leave_room",name);
+            io.emit("leave_room",name,room);
         });
     });
 });

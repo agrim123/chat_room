@@ -9,7 +9,6 @@
 	<script type="text/javascript" src="/javascripts/bootstrap.js"></script>
 </head>
 <body>
-
 	<div class="row">
 		<div class="col-md-2 col-xs-2">
 			<div class="col-md-12 col-xs-12">
@@ -108,12 +107,12 @@
 				socket.emit('notifyUser',username);
 			}
 		});
-		socket.emit("name",username);
-		socket.on("join_room",function(name){
-			$('#activity').append($('<li>').text(name + ' joined the room'));
+		socket.emit("name",username,room);
+		socket.on("join_room",function(name,room){
+			$('#activity').append($('<li>').text(name + ' joined the '+ room));
 		});
-		socket.on("leave_room",function(name){
-			$('#activity').append($('<li>').text(name + ' left the room'));
+		socket.on("leave_room",function(name,room){
+			$('#activity').append($('<li>').text(name + ' left the '+room));
 		});
 		socket.on('chat message', function(messagedata){
 			if( typeof messagedata === 'string' ) {
