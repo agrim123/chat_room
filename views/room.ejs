@@ -84,6 +84,7 @@
 			$("#new_room_name").val('').focus();
 		}else{
 			$(".rooms").append("<p><a href='/room/" + new_room.title+"'>" + new_room.title+ "</a></p> ");
+			window.location = '/room/'+new_room.title;
 		}
 	});
 	socket.on('chat_data',function(messages){
@@ -132,7 +133,7 @@
 			
 			$('#notifyUser').text(useristyping + ' is typing ...');
 			
-			setTimeout(function(){ $('#notifyUser').text(''); }, 5000);
+			setTimeout(function(){ $('#notifyUser').text(''); }, 4000);
 		});
 	</script>
 

@@ -80,6 +80,7 @@ io.sockets.on('connection', function(socket){
         });
     });
     socket.on('add_room',function(new_room_name,username){
+        //Room.remove({title:"node"});
         var new_room = {creator:username,title:new_room_name,created:Date.now()};
         Room.find({title:new_room_name}).exec(function(err,room){
             if(room.length != 0){
