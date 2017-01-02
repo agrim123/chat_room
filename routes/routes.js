@@ -7,7 +7,7 @@ router.get('/',function(req,res){
 		res.render('index',{username:req.session.username,msg:req.session.msg});
 	}else{
 		req.session.msg = "Access Denied";
-		res.redirect('/login');
+		res.redirect('/login',{msg:req.session.msg});
 	}
 });
 router.get('/room/:room',function(req,res){
