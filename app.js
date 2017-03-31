@@ -8,18 +8,31 @@ var expressSession = require('express-session');
 var mongoStore = require('connect-mongo')({session:expressSession});
 var fs = require("fs");
 var mongoose = require('mongoose');
-require('./models/user.js');
+var cron = require('node-cron');
+
+cron.schedule('* 23 * * *', function(){
+    console.log('running a task every 24hrs');
+    console.log('Cleaning DB...');
+    Message.find({}).exec(function(err, messages) {
+        if (err) throw err;
+        for (var i = messages.length - 1; i >= 0; i--) {
+            messages[i].remove();
+        }
+    });
+});
+
 require('dotenv').config();
-var Message = require('./models/message');
-var Room = require('./models/room');
+
+require('./app/models/user.js');
+var Message = require('./app/models/message');
+var Room = require('./app/models/room');
 var routes = require('./routes/routes');
 
 var app = express();
 mongoose.Promise = global.Promise;
-var db = mongoose.connect(process.env.MONGODB_URI, { server: { auto_reconnect: true } }, function (err, db) {
-});
+var db = mongoose.connect(process.env.MONGODB_URI, { server: { auto_reconnect: true } });
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'app/views'));
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 app.use(favicon());
@@ -70,6 +83,7 @@ app.use(function(err, req, res, next) {
         error: {}
     });
 });
+
 //module.exports = app;
 var io = require('socket.io').listen(app.listen(process.env.PORT));
 io.sockets.on('connection', function(socket){
@@ -80,18 +94,26 @@ io.sockets.on('connection', function(socket){
         });
     });
     socket.on('add_room',function(new_room_name,username){
-        //Room.remove({title:"node"});
-        var new_room = {creator:username,title:new_room_name,created:Date.now()};
+        var new_room = {creator:username,title:new_room_name,created:Date.now(),messageCode: 200};
         Room.find({title:new_room_name}).exec(function(err,room){
             if(room.length != 0){
-                io.emit('add_room',"Room already exists");
+                response = {
+                    "messageCode": 201,
+                    "creator": username
+                };
+                io.emit('add_room',response);
             }else{
                 var room = new Room(new_room);
                 room.save(function(err){
-                   if(err){
+                 if(err){
                     console.log(err);
-                    io.emit('add_room', "error creating room");
+                    response = {
+                        "messageCode": 202,
+                        "creator": username
+                    };
+                    io.emit('add_room', response);
                 }else{
+                    new_room.messageCode = 200;
                     io.emit('add_room', new_room);
                 }
             });
@@ -107,14 +129,13 @@ io.sockets.on('connection', function(socket){
     socket.on('name',function(name,room){
         io.emit("join_room",name,room);
         socket.on('chat message', function(message){
-           var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
-           Room.find({title:messagedata.room}).exec(function(err,room){
+         var messagedata = {username:message.fromuser,content:message.content,created:Date.now(),room:message.room};
+         Room.find({title:messagedata.room}).exec(function(err,room){
             if(room.length == 0){
-
                 io.emit('chat message', "Room does not exist! Create One ");
             }else{
-               var message = new Message(messagedata);
-               message.save(function(err){
+             var message = new Message(messagedata);
+             message.save(function(err){
                 if(err){
                     console.log(err);
                     io.emit('chat message', "error sending message");
@@ -122,9 +143,9 @@ io.sockets.on('connection', function(socket){
                     io.emit('chat message', messagedata);
                 }
             });
-           }
-       });
-       });
+         }
+     });
+     });
         socket.on('notifyUser', function(useristyping){
             io.emit('notifyUser', useristyping);
         });
