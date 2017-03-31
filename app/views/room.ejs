@@ -62,10 +62,6 @@
 </div>
 
 <script type="text/javascript">
-	window.setInterval(function() {
-		var elem = document.getElementById('messages');
-		elem.scrollTop = elem.scrollHeight;
-	}, 200);
 	var socket = io();
 	var room = '<%= room %>';
 	var username = '<%= username %>';
@@ -129,6 +125,10 @@
 					$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messagedata.content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messagedata.username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
 				}
 			}
+			window.setInterval(function() {
+				var elem = document.getElementById('messages');
+				elem.scrollTop = elem.scrollHeight;
+			}, 200);
 		}
 	});
 	socket.on('notifyUser', function(useristyping){
