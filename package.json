@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "forever start --minUptime 1000 --spinSleepTime 1000 ./bin/www",
-    "stop": "forever stop ./bin/www",
-    "restart": "forever restart ./bin/www",
+    "start": "forever start --minUptime 1000 --spinSleepTime 1000 app.js",
+    "stop": "forever stop app.js",
+    "restart": "forever restart app.js",
     "watch": "nodemon app.js"
   },
   "dependencies": {
