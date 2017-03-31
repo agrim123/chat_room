@@ -1,57 +1,29 @@
 var express = require('express');
 var router = express.Router();
-var crypto = require('crypto');
-var users = require('../controllers/users_controller');
-router.get('/',function(req,res){
-	if(req.session.user){
-		res.render('index',{username:req.session.username,msg:req.session.msg});
-	}else{
-		req.session.msg = "Access Denied";
-		res.redirect('/login',{msg:req.session.msg});
-	}
+
+var users = require('../app/controllers/users_controller');
+var sessions = require('../app/controllers/sessions_controller');
+var rooms = require('../app/controllers/rooms_controller');
+var messages = require('../app/controllers/messages_controller');
+
+var isLoggedIn = require('../app/middlewares/login_middleware');
+
+router.get('/',isLoggedIn, function(req,res){
+	res.render('index',{username:req.session.username,msg:req.session.msg});
 });
-router.get('/room/:room',function(req,res){
-	if(req.session.user){
-		var room = req.params.room;
-			res.render('room',{username:req.session.username,msg:req.session.msg,room:room});
-	}else{
-		req.session.msg = "Access Denied";
-		res.redirect('/login');
-	}
-});
-router.get('/login',function(req,res){
-	if(req.session.user){
-		res.redirect('/');
-	}else{
-		res.render('login',{msg:req.session.msg});
-	}
-});
-router.get('/user',function(req,res){
-	if(req.session.user){
-		res.render('user',{msg:msg.session.msg});
-	}else{
-		req.session.msg = 'Access Denied';
-		res.redirect('/');
-	}
-});
-router.get('/signup',function(req,res){
-	if(req.session.user){
-		res.redirect('/');
-	}else{
-		res.render('signup',{msg:req.session.msg});
-	}
-});
-router.get('/logout',function(req,res){
-	req.session.destroy(function(){
-		res.redirect('/login');
-	});
-});
-router.post('/signup',users.signup);
-//router.post('/user/update',users.updateUser);
-//router.post('/user/delete',users.deleteUser);
-router.post('/login',users.login);
+
+router.get('/rooms', isLoggedIn, rooms.index);
+router.get('/rooms/:room', isLoggedIn, rooms.show);
+
+router.get('/signup', users.new);
+router.post('/signup',users.create);
 router.get('/user/profile',users.getUserProfile);
-//router.post('/',messages.send);
+
+router.get('/login', sessions.new);
+router.post('/login',sessions.create);
+router.get('/logout', sessions.destroy);
+
+router.get('/clean_db', messages.clean_db);
 
 module.exports = router;
 
