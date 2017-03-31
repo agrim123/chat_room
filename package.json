@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "start": "forever start --minUptime 1000 --spinSleepTime 1000 ./bin/www",
+    "stop": "forever stop ./bin/www",
+    "restart": "forever restart ./bin/www",
     "watch": "nodemon app.js"
   },
   "dependencies": {
@@ -14,6 +17,7 @@
     "ejs": "~0.8.5",
     "express": "~4.0.0",
     "express-session": "^1.14.2",
+    "forever": "^0.15.3",
     "http": "0.0.0",
     "mongoose": "^4.7.0",
     "morgan": "~1.0.0",
