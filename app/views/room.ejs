@@ -58,6 +58,7 @@
 	</div>
 </div>
 <div id="input_message">
+	<div class="msg-error"></div>
 	<input id="m" name="content" placeholder="Press enter to send message" autofocus="on"/>
 </div>
 
@@ -97,11 +98,18 @@
 	});
 	$('#m').keyup(function(e){
 		if(e.keyCode == 13){
-			var content = $('#m').val();
-			var message = {fromuser:username,content:content,room:room} 
-			socket.emit('chat message', message);
-			$('#m').val('').focus();
-			return false;
+			if($('#m').val() != '') {
+				var content = $('#m').val();
+				var message = {fromuser:username,content:content,room:room} 
+				socket.emit('chat message', message);
+				$('#m').val('').focus();
+				return false;
+			}else{
+				$(".msg-error").html('').append('Please type something!!');
+				setTimeout(function() {
+					$('.msg-error').html('');
+				}, 2000);
+			}
 		}else{
 			socket.emit('notifyUser',username);
 		}
@@ -131,8 +139,8 @@
 					elem.scrollTop = elem.scrollHeight;
 				}else{
 					$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messagedata.content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messagedata.username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
-						var elem = document.getElementById('messages');
-						elem.scrollTop = elem.scrollHeight;
+					var elem = document.getElementById('messages');
+					elem.scrollTop = elem.scrollHeight;
 				}
 			}
 		}
