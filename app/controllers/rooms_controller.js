@@ -17,7 +17,7 @@ exports.new_room = function(req,res) {
 
 exports.show = function(req,res) {
 	var room = req.params.room;
-	res.render('room',{username:req.session.username,msg:req.session.msg,room:room});
+	res.render('room',{ username: req.session.username, msg: req.session.msg, color: req.session.color, room: room });
 }
 
 exports.index = function(req,res) {
