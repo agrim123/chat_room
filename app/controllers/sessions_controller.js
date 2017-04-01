@@ -21,6 +21,7 @@ exports.create = function(req,res){
 				req.session.user = user.id;
 				req.session.username = user.username;
 				req.session.msg = 'Auithenticated as '+ user.username;
+				req.session.color = '';
 				res.redirect('/');
 			});
 		}else{

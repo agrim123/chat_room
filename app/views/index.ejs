@@ -34,7 +34,7 @@
 		});
 		socket.on("add_room",function(new_room){
 			$(".rooms").append("<p><a href='/rooms/" + new_room.title+"'>" + new_room.title+ "</a></p> ");
-			window.location.href = '/room/'+new_room.title;
+			window.location.href = '/rooms/'+new_room.title;
 		});
 	</script>
 

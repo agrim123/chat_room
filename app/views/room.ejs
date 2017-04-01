@@ -12,7 +12,7 @@
 	<div class="row">
 		<div class="col-md-2 col-xs-2">
 			<div class="col-md-12 col-xs-12">
-				Rooms
+				Rooms <%= color %>
 				<div class="rooms">
 				</div>
 				<input id="new_room_name" type="text" name="new_room">
@@ -121,14 +121,20 @@
 			if(messagedata.room === room){
 				if(messagedata.username === username){
 					$('#messages').append("<div class='chat-message chat-message-sender'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+ messagedata.content +"</p></div><div class='chat-details'><span class='chat-message-localisation font-size-small'>"+ messagedata.username +"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");
+					$('.chat-wrapper .chat-message.chat-message-sender p').css({
+						'background': '<%= color %>'
+					});
+					$('.chat-wrapper .chat-message.chat-message-sender .chat-message-wrapper:before').css({
+						'border-left-color': '<%= color %>'
+					});
+					var elem = document.getElementById('messages');
+					elem.scrollTop = elem.scrollHeight;
 				}else{
 					$('#messages').append("<div class='chat-message chat-message-recipient'><div class='chat-message-wrapper'><div class='chat-message-content'><p>"+messagedata.content+"</p></div><div class='chat-details'><span class='chat-message-localization font-size-small'>"+messagedata.username+"</span><span class='chat-message-read-status font-size-small'>-</span></div></div></div>");	
+						var elem = document.getElementById('messages');
+						elem.scrollTop = elem.scrollHeight;
 				}
 			}
-			window.setInterval(function() {
-				var elem = document.getElementById('messages');
-				elem.scrollTop = elem.scrollHeight;
-			}, 200);
 		}
 	});
 	socket.on('notifyUser', function(useristyping){
